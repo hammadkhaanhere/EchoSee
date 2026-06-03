@@ -6,12 +6,14 @@ class TranscriptTile extends StatefulWidget {
   final Transcript transcript;
   final VoidCallback onTap;
   final int index;
+  final bool isDark;
 
   const TranscriptTile({
     super.key,
     required this.transcript,
     required this.onTap,
     required this.index,
+    this.isDark = false,
   });
 
   @override
@@ -60,7 +62,8 @@ class _TranscriptTileState extends State<TranscriptTile>
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.cardBackground,
+            color:
+                widget.isDark ? AppColors.darkCard : AppColors.cardBackground,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -82,8 +85,10 @@ class _TranscriptTileState extends State<TranscriptTile>
                       widget.transcript.text,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.subtitleText,
+                      style: TextStyle(
+                        color: widget.isDark
+                            ? AppColors.darkSubtitleText
+                            : AppColors.subtitleText,
                         fontSize: 13,
                       ),
                     ),
@@ -93,8 +98,10 @@ class _TranscriptTileState extends State<TranscriptTile>
               const SizedBox(width: 8),
               Text(
                 dateStr,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: widget.isDark
+                      ? AppColors.darkSubtitleText
+                      : AppColors.textSecondary,
                   fontSize: 11,
                 ),
               ),
@@ -110,7 +117,10 @@ class _TranscriptTileState extends State<TranscriptTile>
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            _TranscriptDetailPage(transcript: widget.transcript),
+            _TranscriptDetailPage(
+          transcript: widget.transcript,
+          isDark: widget.isDark,
+        ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return ScaleTransition(
             scale: CurvedAnimation(
@@ -128,12 +138,22 @@ class _TranscriptTileState extends State<TranscriptTile>
 
 class _TranscriptDetailPage extends StatelessWidget {
   final Transcript transcript;
-  const _TranscriptDetailPage({required this.transcript});
+  final bool isDark;
+  const _TranscriptDetailPage(
+      {required this.transcript, this.isDark = false});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(transcript.speaker)),
+      backgroundColor:
+          isDark ? AppColors.darkBackground : AppColors.navyBlue,
+      appBar: AppBar(
+        backgroundColor:
+            isDark ? AppColors.darkBackground : AppColors.navyBlue,
+        title: Text(transcript.speaker,
+            style: const TextStyle(color: AppColors.textPrimary)),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -141,13 +161,21 @@ class _TranscriptDetailPage extends StatelessWidget {
           children: [
             Text(
               transcript.speaker,
-              style: const TextStyle(
-                  fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color:
+                      isDark ? AppColors.darkText : AppColors.textPrimary),
             ),
             const SizedBox(height: 8),
             Text(
               transcript.text,
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(
+                fontSize: 16,
+                color: isDark
+                    ? AppColors.darkSubtitleText
+                    : AppColors.subtitleText,
+              ),
             ),
             const Spacer(),
             Text(

@@ -43,8 +43,11 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                     t.text.toLowerCase().contains(query);
               }).toList()
             : transcripts;
-        final displayLimit =
-            widget.appState.isPremium ? filtered.length : filtered.length;
+        final displayLimit = widget.appState.isPremium
+            ? filtered.length
+            : filtered.length > 5
+                ? 5
+                : filtered.length;
 
         return Scaffold(
           backgroundColor: isDark
@@ -57,7 +60,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                 if (widget.appState.isPremium) _buildSearchBar(isDark),
                 _buildLimitBanner(isDark),
                 Expanded(
-                  child: filtered.isEmpty
+                        child: filtered.isEmpty
                       ? _buildEmptyState(isDark)
                       : ListView.builder(
                           padding: const EdgeInsets.only(top: 8, bottom: 80),
@@ -67,6 +70,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
                             return TranscriptTile(
                               transcript: t,
                               index: index,
+                              isDark: isDark,
                               onTap: () {},
                             );
                           },
@@ -89,7 +93,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
           Text(
             'Transcripts',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: isDark ? AppColors.darkText : AppColors.textPrimary,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),

@@ -31,10 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return AnimatedBuilder(
       animation: widget.appState,
       builder: (context, _) {
+        final isDark = widget.appState.themeMode == ThemeMode.dark;
         return Scaffold(
-          backgroundColor: widget.appState.themeMode == ThemeMode.dark
-              ? AppColors.darkBackground
-              : AppColors.navyBlue,
+          backgroundColor:
+              isDark ? AppColors.darkBackground : AppColors.navyBlue,
           body: _pages[_currentIndex],
           bottomNavigationBar: AppBottomNav(
             currentIndex: _currentIndex,
@@ -45,12 +45,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  late final List<Widget> _pages = [
-    TranscriptScreen(appState: widget.appState),
-    _buildListenPage(),
-    _buildVisionPage(),
-    _buildMePage(),
-  ];
+  List<Widget> get _pages => [
+        TranscriptScreen(appState: widget.appState),
+        _buildListenPage(),
+        _buildVisionPage(),
+        _buildMePage(),
+      ];
 
   Widget _buildListenPage() {
     return SafeArea(
@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildMePage() {
     return Center(
       child: Text(
-        'Profile & Settings',
+        'Profile',
         style: TextStyle(
           color: widget.appState.themeMode == ThemeMode.dark
               ? AppColors.darkText
@@ -124,17 +124,21 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: Icon(Icons.settings,
-                    color: widget.appState.themeMode == ThemeMode.dark
-                        ? AppColors.darkText
-                        : AppColors.textPrimary),
+                icon: Icon(
+                  Icons.settings,
+                  color: widget.appState.themeMode == ThemeMode.dark
+                      ? AppColors.darkText
+                      : AppColors.textPrimary,
+                ),
                 onPressed: () => _showSettingsSheet(),
               ),
               IconButton(
-                icon: Icon(Icons.text_fields,
-                    color: widget.appState.themeMode == ThemeMode.dark
-                        ? AppColors.darkText
-                        : AppColors.textPrimary),
+                icon: Icon(
+                  Icons.text_fields,
+                  color: widget.appState.themeMode == ThemeMode.dark
+                      ? AppColors.darkText
+                      : AppColors.textPrimary,
+                ),
                 onPressed: () => _showFontSheet(),
               ),
             ],
@@ -200,11 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: _subtitles.length,
         itemBuilder: (context, index) {
           final item = _subtitles[index];
-          return _buildDialogueBubble(
-            item['speaker']!,
-            item['text']!,
-            isDark,
-          );
+          return _buildDialogueBubble(item['speaker']!, item['text']!, isDark);
         },
       ),
     );
@@ -241,7 +241,9 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text(
               text,
               style: TextStyle(
-                color: isDark ? AppColors.darkSubtitleText : AppColors.subtitleText,
+                color: isDark
+                    ? AppColors.darkSubtitleText
+                    : AppColors.subtitleText,
                 fontSize: 14 * widget.appState.textScaleFactor,
               ),
             ),
@@ -281,8 +283,9 @@ class _HomeScreenState extends State<HomeScreen> {
               widget.appState.addTranscript(t);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                    content: Text('Transcript saved'),
-                    duration: Duration(seconds: 1)),
+                  content: Text('Transcript saved'),
+                  duration: Duration(seconds: 1),
+                ),
               );
             },
           ),

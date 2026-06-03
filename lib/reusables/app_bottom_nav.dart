@@ -16,33 +16,26 @@ class AppBottomNav extends StatelessWidget {
     return Theme(
       data: Theme.of(context).copyWith(
         canvasColor: AppColors.navyBlue,
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
       ),
       child: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: onTap,
         type: BottomNavigationBarType.fixed,
-        iconSize: 20,
+        iconSize: 24,
         selectedFontSize: 11,
         unselectedFontSize: 11,
         selectedItemColor: AppColors.teal,
         unselectedItemColor: AppColors.textSecondary,
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: 'Log',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.hearing),
-            label: 'Listen',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Log'),
+          BottomNavigationBarItem(icon: Icon(Icons.hearing), label: 'Listen'),
           BottomNavigationBarItem(
             icon: Icon(Icons.visibility),
             label: 'Vision',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Me',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Me'),
         ],
       ),
     );

@@ -5,7 +5,7 @@ import '../constants/app_colors.dart';
 import '../models/transcript.dart';
 
 class AppState extends ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.dark;
+  ThemeMode _themeMode = ThemeMode.system;
   FontSizeOption _fontSize = FontSizeOption.medium;
   Color _subtitleBgColor = Colors.white;
   SubtitlePosition _subtitlePosition = SubtitlePosition.bottom;
@@ -62,8 +62,12 @@ class AppState extends ChangeNotifier {
   }
 
   void toggleTheme() {
-    themeMode =
-        _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    if (_themeMode == ThemeMode.system) {
+      themeMode = ThemeMode.dark;
+    } else {
+      themeMode =
+          _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+    }
   }
 
   // Transcript management
@@ -86,7 +90,7 @@ class AppState extends ChangeNotifier {
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     _themeMode =
-        _parseThemeMode(prefs.getString('themeMode') ?? 'dark');
+        _parseThemeMode(prefs.getString('themeMode') ?? 'system');
     _fontSize =
         _parseFontSize(prefs.getString('fontSize') ?? 'medium');
     _subtitleBgColor = Color(
@@ -125,8 +129,10 @@ class AppState extends ChangeNotifier {
         return ThemeMode.light;
       case 'dark':
         return ThemeMode.dark;
+      case 'system':
+        return ThemeMode.system;
       default:
-        return ThemeMode.dark;
+        return ThemeMode.system;
     }
   }
 

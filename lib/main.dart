@@ -23,11 +23,14 @@ class EchoSeeApp extends StatefulWidget {
 
 class _EchoSeeAppState extends State<EchoSeeApp> {
   final AppState _appState = AppState();
+  bool _ready = false;
 
   @override
   void initState() {
     super.initState();
-    _appState.load();
+    _appState.load().then((_) {
+      if (mounted) setState(() => _ready = true);
+    });
   }
 
   @override
@@ -47,7 +50,23 @@ class _EchoSeeAppState extends State<EchoSeeApp> {
           theme: AppColors.lightTheme,
           darkTheme: AppColors.darkTheme,
           themeMode: _appState.themeMode,
-          home: SplashScreen(appState: _appState),
+          home: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            switchInCurve: Curves.easeInOut,
+            switchOutCurve: Curves.easeInOut,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            },
+            child: KeyedSubtree(
+              key: ValueKey('${_appState.themeMode}_$_ready'),
+              child: _ready
+                  ? SplashScreen(appState: _appState)
+                  : const SizedBox(),
+            ),
+          ),
         );
       },
     );

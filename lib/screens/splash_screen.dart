@@ -35,8 +35,9 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = widget.appState.themeMode == ThemeMode.dark;
     return Scaffold(
-      backgroundColor: AppColors.navyBlue,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.navyBlue,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -46,7 +47,9 @@ class _SplashScreenState extends State<SplashScreen> {
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.15),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.white.withValues(alpha: 0.15),
               ),
               child: ClipOval(
                 child: Image.asset(
@@ -58,10 +61,10 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            Text(
               'EchoSee',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: isDark ? AppColors.darkText : AppColors.textPrimary,
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
@@ -71,7 +74,9 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               'See the sound around you',
               style: TextStyle(
-                color: AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkSubtitleText
+                    : AppColors.textSecondary,
                 fontSize: 14,
                 letterSpacing: 0.5,
               ),
