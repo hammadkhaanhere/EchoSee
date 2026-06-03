@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "780160909583",
+    "project_id": "echosee-smart-glasses-app",
+    "storage_bucket": "echosee-smart-glasses-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780160909583:android:fa7e1d662bca927cbe7e7a",
+        "android_client_info": {
+          "package_name": "com.example.echosee_smart_glasses_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6n1Ct3Rgu01P3n--fH9pzXacc1vTGR2s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
