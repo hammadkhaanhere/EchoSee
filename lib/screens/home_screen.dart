@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../state/app_state.dart';
 import '../reusables/app_bottom_nav.dart';
+import '../reusables/font_size_selector.dart';
+import '../reusables/theme_toggle.dart';
+import '../reusables/subtitle_customizer.dart';
+import '../models/transcript.dart';
+import 'transcript_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final AppState appState;
+  const HomeScreen({super.key, required this.appState});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -21,31 +28,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.navyBlue,
-      body: _pages[_currentIndex],
-      bottomNavigationBar: AppBottomNav(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-      ),
+    return AnimatedBuilder(
+      animation: widget.appState,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: widget.appState.themeMode == ThemeMode.dark
+              ? AppColors.darkBackground
+              : AppColors.navyBlue,
+          body: _pages[_currentIndex],
+          bottomNavigationBar: AppBottomNav(
+            currentIndex: _currentIndex,
+            onTap: (index) => setState(() => _currentIndex = index),
+          ),
+        );
+      },
     );
   }
 
   late final List<Widget> _pages = [
-    _buildLogPage(),
+    TranscriptScreen(appState: widget.appState),
     _buildListenPage(),
     _buildVisionPage(),
     _buildMePage(),
   ];
-
-  Widget _buildLogPage() {
-    return const Center(
-      child: Text(
-        'Conversation Logs',
-        style: TextStyle(color: AppColors.textPrimary, fontSize: 18),
-      ),
-    );
-  }
 
   Widget _buildListenPage() {
     return SafeArea(
@@ -60,22 +65,33 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildVisionPage() {
-    return const Center(
+    return Center(
       child: Text(
         'Vision Assistance',
-        style: TextStyle(color: AppColors.textPrimary, fontSize: 18),
+        style: TextStyle(
+          color: widget.appState.themeMode == ThemeMode.dark
+              ? AppColors.darkText
+              : AppColors.textPrimary,
+          fontSize: 18,
+        ),
       ),
     );
   }
 
   Widget _buildMePage() {
-    return const Center(
+    return Center(
       child: Text(
         'Profile & Settings',
-        style: TextStyle(color: AppColors.textPrimary, fontSize: 18),
+        style: TextStyle(
+          color: widget.appState.themeMode == ThemeMode.dark
+              ? AppColors.darkText
+              : AppColors.textPrimary,
+          fontSize: 18,
+        ),
       ),
     );
   }
+
   Widget _buildTopBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -94,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 'Live',
                 style: TextStyle(
                   color: AppColors.textPrimary,
@@ -108,15 +124,18 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: const Icon(Icons.settings, color: AppColors.textPrimary),
-                onPressed: () {},
+                icon: Icon(Icons.settings,
+                    color: widget.appState.themeMode == ThemeMode.dark
+                        ? AppColors.darkText
+                        : AppColors.textPrimary),
+                onPressed: () => _showSettingsSheet(),
               ),
               IconButton(
-                icon: const Icon(
-                  Icons.text_fields,
-                  color: AppColors.textPrimary,
-                ),
-                onPressed: () {},
+                icon: Icon(Icons.text_fields,
+                    color: widget.appState.themeMode == ThemeMode.dark
+                        ? AppColors.darkText
+                        : AppColors.textPrimary),
+                onPressed: () => _showFontSheet(),
               ),
             ],
           ),
@@ -125,11 +144,55 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showFontSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: FontSizeSelector(appState: widget.appState),
+      ),
+    );
+  }
+
+  void _showSettingsSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Settings',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const SizedBox(height: 20),
+            ThemeToggle(appState: widget.appState),
+            const Divider(height: 32),
+            SubtitleCustomizer(appState: widget.appState),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSubtitleArea() {
+    final isDark = widget.appState.themeMode == ThemeMode.dark;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.subtitleBackground,
+        color: isDark
+            ? widget.appState.subtitleBgColor.withValues(alpha: 0.15)
+            : widget.appState.subtitleBgColor,
         borderRadius: BorderRadius.circular(16),
       ),
       child: ListView.builder(
@@ -137,18 +200,22 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: _subtitles.length,
         itemBuilder: (context, index) {
           final item = _subtitles[index];
-          return _buildDialogueBubble(item['speaker']!, item['text']!);
+          return _buildDialogueBubble(
+            item['speaker']!,
+            item['text']!,
+            isDark,
+          );
         },
       ),
     );
   }
 
-  Widget _buildDialogueBubble(String speaker, String text) {
+  Widget _buildDialogueBubble(String speaker, String text, bool isDark) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -173,9 +240,9 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                color: AppColors.subtitleText,
-                fontSize: 14,
+              style: TextStyle(
+                color: isDark ? AppColors.darkSubtitleText : AppColors.subtitleText,
+                fontSize: 14 * widget.appState.textScaleFactor,
               ),
             ),
           ),
@@ -204,7 +271,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           child: IconButton(
             icon: const Icon(Icons.mic, color: Colors.white, size: 32),
-            onPressed: () {},
+            onPressed: () {
+              final t = Transcript(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                speaker: 'Speaker ${(_subtitles.length % 2) + 1}',
+                text: 'Simulated transcription entry.',
+                timestamp: DateTime.now(),
+              );
+              widget.appState.addTranscript(t);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Transcript saved'),
+                    duration: Duration(seconds: 1)),
+              );
+            },
           ),
         ),
       ),
