@@ -7,6 +7,7 @@ import '../reusables/theme_toggle.dart';
 import '../reusables/subtitle_customizer.dart';
 import '../models/transcript.dart';
 import 'transcript_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final AppState appState;
@@ -49,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
         TranscriptScreen(appState: widget.appState),
         _buildListenPage(),
         _buildVisionPage(),
-        _buildMePage(),
+        ProfileScreen(appState: widget.appState),
       ];
 
   Widget _buildListenPage() {
@@ -65,27 +66,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildVisionPage() {
+    final isDark = widget.appState.themeMode == ThemeMode.dark;
     return Center(
       child: Text(
         'Vision Assistance',
         style: TextStyle(
-          color: widget.appState.themeMode == ThemeMode.dark
-              ? AppColors.darkText
-              : AppColors.textPrimary,
-          fontSize: 18,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMePage() {
-    return Center(
-      child: Text(
-        'Profile',
-        style: TextStyle(
-          color: widget.appState.themeMode == ThemeMode.dark
-              ? AppColors.darkText
-              : AppColors.textPrimary,
+          color: isDark ? AppColors.darkText : AppColors.textPrimary,
           fontSize: 18,
         ),
       ),
@@ -93,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTopBar() {
+    final isDark = widget.appState.themeMode == ThemeMode.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -110,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(width: 6),
-              Text(
+              const Text(
                 'Live',
                 style: TextStyle(
                   color: AppColors.textPrimary,
@@ -124,21 +111,13 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: Icon(
-                  Icons.settings,
-                  color: widget.appState.themeMode == ThemeMode.dark
-                      ? AppColors.darkText
-                      : AppColors.textPrimary,
-                ),
+                icon: Icon(Icons.settings,
+                    color: isDark ? AppColors.darkText : AppColors.textPrimary),
                 onPressed: () => _showSettingsSheet(),
               ),
               IconButton(
-                icon: Icon(
-                  Icons.text_fields,
-                  color: widget.appState.themeMode == ThemeMode.dark
-                      ? AppColors.darkText
-                      : AppColors.textPrimary,
-                ),
+                icon: Icon(Icons.text_fields,
+                    color: isDark ? AppColors.darkText : AppColors.textPrimary),
                 onPressed: () => _showFontSheet(),
               ),
             ],
@@ -241,9 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text(
               text,
               style: TextStyle(
-                color: isDark
-                    ? AppColors.darkSubtitleText
-                    : AppColors.subtitleText,
+                color: isDark ? AppColors.darkSubtitleText : AppColors.subtitleText,
                 fontSize: 14 * widget.appState.textScaleFactor,
               ),
             ),
