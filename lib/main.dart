@@ -1,23 +1,26 @@
-import 'package:echosee_smart_glasses_app/firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-void main() async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const MyApp());
+import 'app/routes/app_pages.dart';
+import 'app/routes/app_routes.dart';
+
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const EchoSeeApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class EchoSeeApp extends StatelessWidget {
+  const EchoSeeApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
+    return GetMaterialApp(
+      title: 'EchoSee',
+      debugShowCheckedModeBanner: false,
+      initialRoute: AppRoutes.home,
+      getPages: AppPages.pages,
       theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2563EB)),
         useMaterial3: true,
       ),
     );
