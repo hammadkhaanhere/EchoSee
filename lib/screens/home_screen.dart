@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../state/app_state.dart';
@@ -19,13 +20,31 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 1;
+  bool _isListening = false;
+  Timer? _timer;
+  int _fakeIndex = 0;
+  final List<Map<String, String>> _displayed = [];
+  final ScrollController _scrollCtrl = ScrollController();
 
-  final List<Map<String, String>> _subtitles = [
-    {'speaker': 'Speaker 1', 'text': 'Hello, how are you today?'},
-    {'speaker': 'Speaker 2', 'text': 'I am doing great, thanks for asking!'},
-    {'speaker': 'Speaker 1', 'text': 'Are you coming to the meeting later?'},
-    {'speaker': 'Speaker 2', 'text': 'Yes, I will be there at 3 PM sharp.'},
+  static const List<Map<String, String>> _fakeSubtitles = [
+    {'speaker': 'Speaker 1', 'text': 'Welcome to EchoSee live transcription.'},
+    {'speaker': 'Speaker 2', 'text': 'This is a simulated conversation demo.'},
+    {'speaker': 'Speaker 1', 'text': 'Each subtitle fades and slides up smoothly.'},
+    {'speaker': 'Speaker 2', 'text': 'Tap the mic again to pause at any time.'},
+    {'speaker': 'Speaker 1', 'text': 'When all entries are shown it stops.'},
+    {'speaker': 'Speaker 2', 'text': 'Transcripts are saved to your Log tab.'},
+    {'speaker': 'Speaker 1', 'text': 'Premium users get unlimited history.'},
+    {'speaker': 'Speaker 2', 'text': 'With search by keyword or date.'},
+    {'speaker': 'Speaker 1', 'text': 'You can also export transcripts as PDF.'},
+    {'speaker': 'Speaker 2', 'text': 'Check the Log tab to view them all.'},
   ];
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,18 +107,19 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
                 width: 10,
                 height: 10,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.greenLive,
+                  color: _isListening ? AppColors.greenLive : Colors.grey,
                 ),
               ),
               const SizedBox(width: 6),
-              const Text(
-                'Live',
-                style: TextStyle(
+              Text(
+                _isListening ? 'Live' : 'Idle',
+                style: const TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -125,6 +145,100 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildSubtitleArea() {
+    final isDark = widget.appState.themeMode == ThemeMode.dark;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: isDark
+            ? widget.appState.subtitleBgColor.withValues(alpha: 0.15)
+            : widget.appState.subtitleBgColor,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: _displayed.isEmpty
+          ? Center(
+              child: Text(
+                'Tap the mic to start',
+                style: TextStyle(
+                  color:
+                      isDark ? AppColors.darkSubtitleText : AppColors.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
+            )
+          : ListView.builder(
+              controller: _scrollCtrl,
+              padding: const EdgeInsets.all(12),
+              itemCount: _displayed.length,
+              itemBuilder: (context, index) {
+                final item = _displayed[index];
+                return _AnimatedSubtitle(
+                  key: ValueKey('sub_${item.hashCode}_$index'),
+                  speaker: item['speaker']!,
+                  text: item['text']!,
+                  isDark: isDark,
+                  textScale: widget.appState.textScaleFactor,
+                );
+              },
+            ),
+    );
+  }
+
+  Widget _buildBottomMic() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: GestureDetector(
+        onTap: _toggleListening,
+        child: _PulsingMic(isListening: _isListening),
+      ),
+    );
+  }
+
+  void _toggleListening() {
+    if (_isListening) {
+      _timer?.cancel();
+      setState(() => _isListening = false);
+    } else {
+      if (_fakeIndex >= _fakeSubtitles.length) {
+        _fakeIndex = 0;
+        _displayed.clear();
+      }
+      setState(() => _isListening = true);
+      _addNext();
+      _timer = Timer.periodic(const Duration(seconds: 2), (_) => _addNext());
+    }
+  }
+
+  void _addNext() {
+    if (_fakeIndex >= _fakeSubtitles.length) {
+      _timer?.cancel();
+      setState(() => _isListening = false);
+      return;
+    }
+    final item = _fakeSubtitles[_fakeIndex];
+    _fakeIndex++;
+
+    final t = Transcript(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      speaker: item['speaker']!,
+      text: item['text']!,
+      timestamp: DateTime.now(),
+    );
+    widget.appState.addTranscript(t);
+
+    setState(() => _displayed.add(item));
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollCtrl.hasClients) {
+        _scrollCtrl.animateTo(
+          _scrollCtrl.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _showFontSheet() {
@@ -167,34 +281,152 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+}
 
-  Widget _buildSubtitleArea() {
-    final isDark = widget.appState.themeMode == ThemeMode.dark;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: isDark
-            ? widget.appState.subtitleBgColor.withValues(alpha: 0.15)
-            : widget.appState.subtitleBgColor,
-        borderRadius: BorderRadius.circular(16),
+// ─── Pulsing Mic ──────────────────────────────────────────
+
+class _PulsingMic extends StatefulWidget {
+  final bool isListening;
+  const _PulsingMic({required this.isListening});
+
+  @override
+  State<_PulsingMic> createState() => _PulsingMicState();
+}
+
+class _PulsingMicState extends State<_PulsingMic>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scaleAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _scaleAnim = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+    if (widget.isListening) {
+      _ctrl.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_PulsingMic old) {
+    super.didUpdateWidget(old);
+    if (widget.isListening && !old.isListening) {
+      _ctrl.repeat(reverse: true);
+    } else if (!widget.isListening && old.isListening) {
+      _ctrl.stop();
+      _ctrl.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: _scaleAnim,
+      child: Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: widget.isListening ? Colors.redAccent : AppColors.teal,
+          boxShadow: [
+            BoxShadow(
+              color: (widget.isListening ? Colors.redAccent : AppColors.teal)
+                  .withValues(alpha: 0.4),
+              blurRadius: widget.isListening ? 16 : 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(
+          widget.isListening ? Icons.stop : Icons.mic,
+          color: Colors.white,
+          size: 32,
+        ),
       ),
-      child: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: _subtitles.length,
-        itemBuilder: (context, index) {
-          final item = _subtitles[index];
-          return _buildDialogueBubble(item['speaker']!, item['text']!, isDark);
-        },
+    );
+  }
+}
+
+// ─── Animated Subtitle Tile ──────────────────────────────
+
+class _AnimatedSubtitle extends StatefulWidget {
+  final String speaker;
+  final String text;
+  final bool isDark;
+  final double textScale;
+
+  const _AnimatedSubtitle({
+    super.key,
+    required this.speaker,
+    required this.text,
+    required this.isDark,
+    required this.textScale,
+  });
+
+  @override
+  State<_AnimatedSubtitle> createState() => _AnimatedSubtitleState();
+}
+
+class _AnimatedSubtitleState extends State<_AnimatedSubtitle>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _fadeAnim;
+  late Animation<Offset> _slideAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeIn),
+    );
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
+    );
+    _ctrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnim,
+      child: SlideTransition(
+        position: _slideAnim,
+        child: _buildBubble(),
       ),
     );
   }
 
-  Widget _buildDialogueBubble(String speaker, String text, bool isDark) {
+  Widget _buildBubble() {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : AppColors.cardBackground,
+        color: widget.isDark ? AppColors.darkCard : AppColors.cardBackground,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -207,7 +439,7 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              speaker,
+              widget.speaker,
               style: const TextStyle(
                 color: AppColors.speakerLabel,
                 fontSize: 12,
@@ -218,55 +450,16 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              text,
+              widget.text,
               style: TextStyle(
-                color: isDark ? AppColors.darkSubtitleText : AppColors.subtitleText,
-                fontSize: 14 * widget.appState.textScaleFactor,
+                color: widget.isDark
+                    ? AppColors.darkSubtitleText
+                    : AppColors.subtitleText,
+                fontSize: 14 * widget.textScale,
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBottomMic() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
-      child: Center(
-        child: Container(
-          width: 72,
-          height: 72,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.teal,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.mic, color: Colors.white, size: 32),
-            onPressed: () {
-              final t = Transcript(
-                id: DateTime.now().millisecondsSinceEpoch.toString(),
-                speaker: 'Speaker ${(_subtitles.length % 2) + 1}',
-                text: 'Simulated transcription entry.',
-                timestamp: DateTime.now(),
-              );
-              widget.appState.addTranscript(t);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Transcript saved'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-          ),
-        ),
       ),
     );
   }
