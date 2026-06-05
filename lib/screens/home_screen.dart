@@ -54,7 +54,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
 
-                          const SizedBox(height: 8),
+                           SizedBox(height: 8),
 
                           Obx(
                                 () => Container(
@@ -69,7 +69,7 @@ class HomeScreen extends StatelessWidget {
                                     ? '...'
                                     : controller.translatedText.value,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
+                                style:  TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.yellow,

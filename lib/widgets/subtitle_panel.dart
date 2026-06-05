@@ -1,3 +1,4 @@
+import 'package:eecho_see/data/models/language_model.dart';
 import 'package:eecho_see/modules/home/controllers/home_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -36,10 +37,10 @@ class SubtitlePanel extends GetView<HomeController> {
               ),
               if (controller.translatedText.value.isNotEmpty) ...[
                 const SizedBox(height: 16),
-                const Center(
+                Center(
                   child: Text(
-                    'ENGLISH SUBTITLES',
-                    style: TextStyle(
+                    '${controller.selectedLanguage.value.name.toUpperCase()} SUBTITLES',
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 1.2,
@@ -57,13 +58,18 @@ class SubtitlePanel extends GetView<HomeController> {
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
-                    controller.translatedText.value,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.yellow,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
+                  child: Directionality(
+                    textDirection: controller.selectedLanguage.value.isRTL
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
+                    child: Text(
+                      controller.translatedText.value,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.yellow,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),

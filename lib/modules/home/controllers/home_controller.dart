@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:eecho_see/data/models/language_model.dart';
 import 'package:eecho_see/data/services/speech_service.dart';
 import 'package:eecho_see/services/translation_service.dart';
 import 'package:get/get.dart';
@@ -16,6 +19,19 @@ class HomeController extends GetxController {
   final isInitializing = false.obs;
   final statusMessage = 'Ready'.obs;
   final errorMessage = RxnString();
+
+  final selectedLanguage = LanguageModel.supportedLanguages[0].obs;
+  final Map<String, String> _translationCache = {};
+  Timer? _debounceTimer;
+
+  void setLanguage(LanguageModel language) {
+    if (selectedLanguage.value.code == language.code) return;
+    selectedLanguage.value = language;
+    if (recognizedText.value.isNotEmpty &&
+        recognizedText.value != 'Press the microphone and start speaking.') {
+      _translateText(recognizedText.value);
+    }
+  }
 
   Future<void> toggleListening() async {
     if (isListening.value) {
@@ -64,15 +80,34 @@ class HomeController extends GetxController {
     statusMessage.value = 'Stopped';
   }
 
-  void _handleSpeechResult(SpeechRecognitionResult result) async {
+  void _handleSpeechResult(SpeechRecognitionResult result) {
     final words = result.recognizedWords.trim();
-    if (words.isNotEmpty) {
+    if (words.isNotEmpty && words != recognizedText.value) {
       recognizedText.value = words;
-      
-      // Live Translation for Subtitles
-      final translation = await _translationService.translate(words, to: 'en');
-      translatedText.value = translation;
+      _translateText(words);
     }
+  }
+
+  Future<void> _translateText(String text) async {
+    final langCode = selectedLanguage.value.code;
+    final cacheKey = '$langCode:$text';
+
+    if (_translationCache.containsKey(cacheKey)) {
+      translatedText.value = _translationCache[cacheKey]!;
+      return;
+    }
+
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
+      try {
+        final translation = await _translationService.translate(text, to: langCode);
+        _translationCache[cacheKey] = translation;
+        translatedText.value = translation;
+      } catch (e) {
+        // Fallback to recognized text if translation fails
+        translatedText.value = text;
+      }
+    });
   }
 
   void _handleSpeechStatus(String status) {
