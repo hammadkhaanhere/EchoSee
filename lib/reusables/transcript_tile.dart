@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/transcript.dart';
+import '../routes/custom_transitions.dart';
 
 class TranscriptTile extends StatefulWidget {
   final Transcript transcript;
@@ -22,31 +23,34 @@ class TranscriptTile extends StatefulWidget {
 
 class _TranscriptTileState extends State<TranscriptTile>
     with SingleTickerProviderStateMixin {
-  late AnimationController _slideController;
-  late Animation<Offset> _slideAnimation;
+  late AnimationController _ctrl;
+  late Animation<double> _fadeAnim;
+  late Animation<Offset> _slideAnim;
 
   @override
   void initState() {
     super.initState();
-    _slideController = AnimationController(
+    _ctrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1, 0),
+    _fadeAnim = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeIn),
+    );
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(-0.4, 0),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic),
+    );
     Future.delayed(Duration(milliseconds: widget.index * 100), () {
-      if (mounted) _slideController.forward();
+      if (mounted) _ctrl.forward();
     });
   }
 
   @override
   void dispose() {
-    _slideController.dispose();
+    _ctrl.dispose();
     super.dispose();
   }
 
@@ -54,58 +58,65 @@ class _TranscriptTileState extends State<TranscriptTile>
   Widget build(BuildContext context) {
     final dateStr =
         '${widget.transcript.timestamp.day}/${widget.transcript.timestamp.month}/${widget.transcript.timestamp.year}';
-    return SlideTransition(
-      position: _slideAnimation,
-      child: GestureDetector(
-        onTap: () => _openWithScale(context),
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color:
-                widget.isDark ? AppColors.darkCard : AppColors.cardBackground,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.transcript.speaker,
-                      style: const TextStyle(
-                        color: AppColors.speakerLabel,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.transcript.text,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: widget.isDark
-                            ? AppColors.darkSubtitleText
-                            : AppColors.subtitleText,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
+    return FadeTransition(
+      opacity: _fadeAnim,
+      child: SlideTransition(
+        position: _slideAnim,
+        child: GestureDetector(
+          onTap: () => _openWithScale(context),
+          child: Hero(
+            tag: 'transcript_${widget.transcript.id}',
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: widget.isDark
+                    ? AppColors.darkCard
+                    : AppColors.cardBackground,
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 8),
-              Text(
-                dateStr,
-                style: TextStyle(
-                  color: widget.isDark
-                      ? AppColors.darkSubtitleText
-                      : AppColors.textSecondary,
-                  fontSize: 11,
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.transcript.speaker,
+                          style: const TextStyle(
+                            color: AppColors.speakerLabel,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.transcript.text,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: widget.isDark
+                                ? AppColors.darkSubtitleText
+                                : AppColors.subtitleText,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    dateStr,
+                    style: TextStyle(
+                      color: widget.isDark
+                          ? AppColors.darkSubtitleText
+                          : AppColors.textSecondary,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -115,23 +126,10 @@ class _TranscriptTileState extends State<TranscriptTile>
   void _openWithScale(BuildContext context) {
     Navigator.push(
       context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            _TranscriptDetailPage(
-          transcript: widget.transcript,
-          isDark: widget.isDark,
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return ScaleTransition(
-            scale: CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeOutBack,
-            ),
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 400),
-      ),
+      scaleUpRoute(_TranscriptDetailPage(
+        transcript: widget.transcript,
+        isDark: widget.isDark,
+      )),
     );
   }
 }
@@ -139,8 +137,7 @@ class _TranscriptTileState extends State<TranscriptTile>
 class _TranscriptDetailPage extends StatelessWidget {
   final Transcript transcript;
   final bool isDark;
-  const _TranscriptDetailPage(
-      {required this.transcript, this.isDark = false});
+  const _TranscriptDetailPage({required this.transcript, this.isDark = false});
 
   @override
   Widget build(BuildContext context) {
@@ -154,36 +151,38 @@ class _TranscriptDetailPage extends StatelessWidget {
             style: const TextStyle(color: AppColors.textPrimary)),
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              transcript.speaker,
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color:
-                      isDark ? AppColors.darkText : AppColors.textPrimary),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              transcript.text,
-              style: TextStyle(
-                fontSize: 16,
-                color: isDark
-                    ? AppColors.darkSubtitleText
-                    : AppColors.subtitleText,
+      body: Hero(
+        tag: 'transcript_${transcript.id}',
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                transcript.speaker,
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? AppColors.darkText : AppColors.textPrimary),
               ),
-            ),
-            const Spacer(),
-            Text(
-              '${transcript.timestamp.day}/${transcript.timestamp.month}/${transcript.timestamp.year} '
-              '${transcript.timestamp.hour}:${transcript.timestamp.minute.toString().padLeft(2, '0')}',
-              style: const TextStyle(color: Colors.grey),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                transcript.text,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: isDark
+                      ? AppColors.darkSubtitleText
+                      : AppColors.subtitleText,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                '${transcript.timestamp.day}/${transcript.timestamp.month}/${transcript.timestamp.year} '
+                '${transcript.timestamp.hour}:${transcript.timestamp.minute.toString().padLeft(2, '0')}',
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
         ),
       ),
     );

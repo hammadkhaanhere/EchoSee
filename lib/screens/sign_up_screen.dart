@@ -3,6 +3,7 @@ import '../constants/app_colors.dart';
 import '../state/app_state.dart';
 import '../reusables/auth_text_field.dart';
 import '../reusables/auth_button.dart';
+import '../routes/custom_transitions.dart';
 import 'home_screen.dart';
 import 'sign_in_screen.dart';
 
@@ -86,14 +87,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               TextButton(
                 onPressed: () => Navigator.pushReplacement(
                   context,
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) =>
-                        SignInScreen(appState: widget.appState),
-                    transitionsBuilder:
-                        (context, a, secondaryAnimation, child) =>
-                            FadeTransition(opacity: a, child: child),
-                    transitionDuration: const Duration(milliseconds: 400),
-                  ),
+                  fadeRoute(SignInScreen(appState: widget.appState)),
                 ),
                 child: const Text(
                   'Already have an account? Sign In',
@@ -178,13 +172,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  HomeScreen(appState: widget.appState),
-              transitionsBuilder: (context, a, secondaryAnimation, child) =>
-                  FadeTransition(opacity: a, child: child),
-              transitionDuration: const Duration(milliseconds: 400),
-            ),
+            fadeScaleRoute(HomeScreen(appState: widget.appState)),
           );
         });
       }

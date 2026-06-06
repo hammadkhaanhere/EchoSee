@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../state/app_state.dart';
+import '../routes/custom_transitions.dart';
 import 'subscription_screen.dart';
 import 'sign_in_screen.dart';
 
@@ -186,9 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return GestureDetector(
       onTap: () => Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => SubscriptionScreen(appState: widget.appState),
-        ),
+        fadeRoute(SubscriptionScreen(appState: widget.appState)),
       ),
       child: Container(
         width: double.infinity,
@@ -246,9 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           widget.appState.signOut();
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
-              builder: (_) => SignInScreen(appState: widget.appState),
-            ),
+            fadeRoute(SignInScreen(appState: widget.appState)),
             (route) => false,
           );
         },

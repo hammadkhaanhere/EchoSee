@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../state/app_state.dart';
+import '../routes/custom_transitions.dart';
 import 'home_screen.dart';
 import 'sign_in_screen.dart';
 
@@ -21,16 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
       final page = widget.appState.isLoggedIn
           ? HomeScreen(appState: widget.appState)
           : SignInScreen(appState: widget.appState);
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => page,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(opacity: animation, child: child);
-          },
-          transitionDuration: const Duration(milliseconds: 400),
-        ),
-      );
+      Navigator.pushReplacement(context, fadeRoute(page));
     });
   }
 

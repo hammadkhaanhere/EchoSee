@@ -37,7 +37,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
         final isDark = widget.appState.themeMode == ThemeMode.dark;
         final transcripts = widget.appState.transcripts;
         final query = _searchCtrl.text.toLowerCase();
-        final filtered = widget.appState.isPremium && query.isNotEmpty
+        final filtered = query.isNotEmpty
             ? transcripts.where((t) {
                 return t.speaker.toLowerCase().contains(query) ||
                     t.text.toLowerCase().contains(query);
@@ -57,7 +57,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
             child: Column(
               children: [
                 _buildHeader(isDark),
-                if (widget.appState.isPremium) _buildSearchBar(isDark),
+                _buildSearchBar(isDark),
                 _buildLimitBanner(isDark),
                 Expanded(
                         child: filtered.isEmpty
@@ -87,26 +87,13 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
   Widget _buildHeader(bool isDark) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'Transcripts',
-            style: TextStyle(
-              color: isDark ? AppColors.darkText : AppColors.textPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (widget.appState.isPremium)
-            TextButton.icon(
-              onPressed: _exportTranscripts,
-              icon: const Icon(Icons.picture_as_pdf,
-                  color: AppColors.teal, size: 20),
-              label: const Text('Export PDF',
-                  style: TextStyle(color: AppColors.teal)),
-            ),
-        ],
+      child: Text(
+        'Transcripts',
+        style: TextStyle(
+          color: isDark ? AppColors.darkText : AppColors.textPrimary,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -222,55 +209,4 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
     );
   }
 
-  void _exportTranscripts() {
-    if (widget.appState.transcripts.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No transcripts to export')),
-      );
-      return;
-    }
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(
-        child: CircularProgressIndicator(color: AppColors.teal),
-      ),
-    );
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.of(context).pop();
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: 1),
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.elasticOut,
-                  builder: (context, value, child) {
-                    return Transform.scale(
-                      scale: value,
-                      child: const Icon(
-                        Icons.check_circle,
-                        color: AppColors.teal,
-                        size: 64,
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                const Text('Export Complete!',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-              ],
-            ),
-          ),
-        );
-        Future.delayed(const Duration(seconds: 2), () {
-          if (mounted) Navigator.of(context).pop();
-        });
-      }
-    });
-  }
 }

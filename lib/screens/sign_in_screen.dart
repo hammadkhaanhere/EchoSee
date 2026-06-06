@@ -3,6 +3,7 @@ import '../constants/app_colors.dart';
 import '../state/app_state.dart';
 import '../reusables/auth_text_field.dart';
 import '../reusables/auth_button.dart';
+import '../routes/custom_transitions.dart';
 import 'sign_up_screen.dart';
 import 'home_screen.dart';
 
@@ -95,15 +96,7 @@ class _SignInScreenState extends State<SignInScreen>
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      PageRouteBuilder(
-                        pageBuilder: (context, animation, secondaryAnimation) =>
-                            SignUpScreen(appState: widget.appState),
-                        transitionsBuilder:
-                            (context, a, secondaryAnimation, child) =>
-                                FadeTransition(opacity: a, child: child),
-                        transitionDuration:
-                            const Duration(milliseconds: 400),
-                      ),
+                      fadeRoute(SignUpScreen(appState: widget.appState)),
                     );
                   },
                   child: const Text(
@@ -183,14 +176,7 @@ class _SignInScreenState extends State<SignInScreen>
           if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            PageRouteBuilder(
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  HomeScreen(appState: widget.appState),
-              transitionsBuilder:
-                  (context, a, secondaryAnimation, child) =>
-                      FadeTransition(opacity: a, child: child),
-              transitionDuration: const Duration(milliseconds: 400),
-            ),
+            fadeScaleRoute(HomeScreen(appState: widget.appState)),
           );
         });
       }

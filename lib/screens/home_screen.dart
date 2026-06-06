@@ -55,7 +55,10 @@ class _HomeScreenState extends State<HomeScreen> {
         return Scaffold(
           backgroundColor:
               isDark ? AppColors.darkBackground : AppColors.navyBlue,
-          body: _pages[_currentIndex],
+          body: _PageFadeSwitcher(
+            index: _currentIndex,
+            pages: _pages,
+          ),
           bottomNavigationBar: AppBottomNav(
             currentIndex: _currentIndex,
             onTap: (index) => setState(() => _currentIndex = index),
@@ -354,6 +357,30 @@ class _PulsingMicState extends State<_PulsingMic>
           color: Colors.white,
           size: 32,
         ),
+      ),
+    );
+  }
+}
+
+// ─── Page Fade Switcher ───────────────────────────────────
+
+class _PageFadeSwitcher extends StatelessWidget {
+  final int index;
+  final List<Widget> pages;
+  const _PageFadeSwitcher({required this.index, required this.pages});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 250),
+      switchInCurve: Curves.easeOut,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+      child: SizedBox(
+        key: ValueKey('tab_$index'),
+        child: pages[index],
       ),
     );
   }
