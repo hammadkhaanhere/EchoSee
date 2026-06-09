@@ -72,7 +72,7 @@ class _TranscriptTileState extends State<TranscriptTile>
               decoration: BoxDecoration(
                 color: widget.isDark
                     ? AppColors.darkCard
-                    : AppColors.cardBackground,
+                    : AppColors.lightCard,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -97,7 +97,7 @@ class _TranscriptTileState extends State<TranscriptTile>
                           style: TextStyle(
                             color: widget.isDark
                                 ? AppColors.darkSubtitleText
-                                : AppColors.subtitleText,
+                                : AppColors.lightSubtitleText,
                             fontSize: 13,
                           ),
                         ),
@@ -110,7 +110,7 @@ class _TranscriptTileState extends State<TranscriptTile>
                     style: TextStyle(
                       color: widget.isDark
                           ? AppColors.darkSubtitleText
-                          : AppColors.textSecondary,
+                          : AppColors.lightTextSecondary,
                       fontSize: 11,
                     ),
                   ),
@@ -143,13 +143,15 @@ class _TranscriptDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          isDark ? AppColors.darkBackground : AppColors.navyBlue,
+          isDark ? AppColors.darkBackground : AppColors.lightBackground,
       appBar: AppBar(
         backgroundColor:
-            isDark ? AppColors.darkBackground : AppColors.navyBlue,
+          isDark ? AppColors.darkBackground : AppColors.lightBackground,
         title: Text(transcript.speaker,
-            style: const TextStyle(color: AppColors.textPrimary)),
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+            style: TextStyle(
+                color: isDark ? AppColors.darkText : AppColors.lightTextPrimary)),
+        iconTheme: IconThemeData(
+            color: isDark ? AppColors.darkText : AppColors.lightTextPrimary),
       ),
       body: Hero(
         tag: 'transcript_${transcript.id}',
@@ -163,7 +165,7 @@ class _TranscriptDetailPage extends StatelessWidget {
                 style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: isDark ? AppColors.darkText : AppColors.textPrimary),
+                    color: isDark ? AppColors.darkText : AppColors.lightTextPrimary),
               ),
               const SizedBox(height: 8),
               Text(
@@ -172,14 +174,14 @@ class _TranscriptDetailPage extends StatelessWidget {
                   fontSize: 16,
                   color: isDark
                       ? AppColors.darkSubtitleText
-                      : AppColors.subtitleText,
+                      : AppColors.lightSubtitleText,
                 ),
               ),
               const Spacer(),
               Text(
                 '${transcript.timestamp.day}/${transcript.timestamp.month}/${transcript.timestamp.year} '
                 '${transcript.timestamp.hour}:${transcript.timestamp.minute.toString().padLeft(2, '0')}',
-                style: const TextStyle(color: Colors.grey),
+                style: TextStyle(color: isDark ? Colors.grey : AppColors.lightTextSecondary),
               ),
             ],
           ),

@@ -52,7 +52,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
         return Scaffold(
           backgroundColor: isDark
               ? AppColors.darkBackground
-              : AppColors.navyBlue,
+              : AppColors.lightBackground,
           body: SafeArea(
             child: Column(
               children: [
@@ -90,7 +90,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
       child: Text(
         'Transcripts',
         style: TextStyle(
-          color: isDark ? AppColors.darkText : AppColors.textPrimary,
+          color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
@@ -105,7 +105,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       height: _searchExpanded ? 48 : 40,
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkCard : Colors.white24,
+        color: isDark ? AppColors.darkCard : AppColors.lightFieldBg,
         borderRadius: BorderRadius.circular(_searchExpanded ? 24 : 20),
       ),
       child: Row(
@@ -113,7 +113,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
           IconButton(
             icon: Icon(
               _searchExpanded ? Icons.close : Icons.search,
-              color: AppColors.textPrimary,
+              color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
               size: _searchExpanded ? 20 : 18,
             ),
             onPressed: () {
@@ -133,21 +133,25 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
               child: TextField(
                 controller: _searchCtrl,
                 focusNode: _searchFocus,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(
+                style: TextStyle(
+                    color: isDark ? AppColors.darkText : AppColors.lightTextPrimary),
+                decoration: InputDecoration(
                   hintText: 'Search by speaker or keyword...',
-                  hintStyle: TextStyle(color: Colors.white54),
+                  hintStyle: TextStyle(
+                      color: isDark ? Colors.white54 : AppColors.lightTextSecondary),
                   border: InputBorder.none,
                 ),
                 onChanged: (_) => setState(() {}),
               ),
             ),
           if (!_searchExpanded)
-            const Padding(
-              padding: EdgeInsets.only(right: 16),
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
               child: Text(
                 'Search',
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                style: TextStyle(
+                    color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
+                    fontSize: 13),
               ),
             ),
         ],
@@ -187,12 +191,12 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
         children: [
           Icon(Icons.article_outlined,
               size: 64,
-              color: isDark ? Colors.white24 : Colors.white38),
+              color: isDark ? Colors.white24 : AppColors.lightTextSecondary.withValues(alpha: 0.4)),
           const SizedBox(height: 16),
           Text(
             'No transcripts yet',
             style: TextStyle(
-              color: AppColors.textSecondary,
+              color: isDark ? AppColors.darkSubtitleText : AppColors.lightTextSecondary,
               fontSize: 16,
             ),
           ),
@@ -200,7 +204,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
           Text(
             'Tap the mic button to start transcribing',
             style: TextStyle(
-              color: isDark ? Colors.white38 : Colors.white30,
+              color: isDark ? Colors.white38 : AppColors.lightTextSecondary.withValues(alpha: 0.6),
               fontSize: 13,
             ),
           ),

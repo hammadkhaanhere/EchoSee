@@ -57,6 +57,7 @@ class _AuthTextFieldState extends State<AuthTextField>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
     return SlideTransition(
       position: _slideAnim,
@@ -68,19 +69,27 @@ class _AuthTextFieldState extends State<AuthTextField>
             TextField(
               controller: widget.controller,
               obscureText: _obscured,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(
+                  color:
+                      isDark ? AppColors.darkText : AppColors.lightTextPrimary),
               decoration: InputDecoration(
                 labelText: widget.label,
-                labelStyle: const TextStyle(color: Colors.white54),
+                labelStyle: TextStyle(
+                    color: isDark
+                        ? Colors.white54
+                        : AppColors.lightTextSecondary),
                 filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.08),
+                fillColor: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : AppColors.lightFieldBg,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.teal, width: 2),
+                  borderSide:
+                      const BorderSide(color: AppColors.teal, width: 2),
                 ),
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -90,7 +99,9 @@ class _AuthTextFieldState extends State<AuthTextField>
                           _obscured
                               ? Icons.visibility_off
                               : Icons.visibility,
-                          color: Colors.white54,
+                          color: isDark
+                              ? Colors.white54
+                              : AppColors.lightTextSecondary,
                         ),
                         onPressed: () =>
                             setState(() => _obscured = !_obscured),

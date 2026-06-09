@@ -50,23 +50,9 @@ class _EchoSeeAppState extends State<EchoSeeApp> {
           theme: AppColors.lightTheme,
           darkTheme: AppColors.darkTheme,
           themeMode: _appState.themeMode,
-          home: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 500),
-            switchInCurve: Curves.easeInOut,
-            switchOutCurve: Curves.easeInOut,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
-            child: KeyedSubtree(
-              key: ValueKey('${_appState.themeMode}_$_ready'),
-              child: _ready
-                  ? SplashScreen(appState: _appState)
-                  : const SizedBox(),
-            ),
-          ),
+          home: _ready
+              ? SplashScreen(appState: _appState)
+              : const SizedBox(),
         );
       },
     );

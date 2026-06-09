@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
         final isDark = widget.appState.themeMode == ThemeMode.dark;
         return Scaffold(
           backgroundColor:
-              isDark ? AppColors.darkBackground : AppColors.navyBlue,
+               isDark ? AppColors.darkBackground : AppColors.lightBackground,
           body: _PageFadeSwitcher(
             index: _currentIndex,
             pages: _pages,
@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Text(
         'Vision Assistance',
         style: TextStyle(
-          color: isDark ? AppColors.darkText : AppColors.textPrimary,
+          color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
           fontSize: 18,
         ),
       ),
@@ -122,8 +122,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(width: 6),
               Text(
                 _isListening ? 'Live' : 'Idle',
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -135,12 +135,12 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               IconButton(
                 icon: Icon(Icons.settings,
-                    color: isDark ? AppColors.darkText : AppColors.textPrimary),
+                    color: isDark ? AppColors.darkText : AppColors.lightTextPrimary),
                 onPressed: () => _showSettingsSheet(),
               ),
               IconButton(
                 icon: Icon(Icons.text_fields,
-                    color: isDark ? AppColors.darkText : AppColors.textPrimary),
+                    color: isDark ? AppColors.darkText : AppColors.lightTextPrimary),
                 onPressed: () => _showFontSheet(),
               ),
             ],
@@ -166,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 'Tap the mic to start',
                 style: TextStyle(
                   color:
-                      isDark ? AppColors.darkSubtitleText : AppColors.textSecondary,
+                      isDark ? AppColors.darkSubtitleText : AppColors.lightTextSecondary,
                   fontSize: 14,
                 ),
               ),
@@ -453,7 +453,7 @@ class _AnimatedSubtitleState extends State<_AnimatedSubtitle>
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: widget.isDark ? AppColors.darkCard : AppColors.cardBackground,
+        color: widget.isDark ? AppColors.darkCard : AppColors.lightCard,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -481,7 +481,7 @@ class _AnimatedSubtitleState extends State<_AnimatedSubtitle>
               style: TextStyle(
                 color: widget.isDark
                     ? AppColors.darkSubtitleText
-                    : AppColors.subtitleText,
+                    : AppColors.lightSubtitleText,
                 fontSize: 14 * widget.textScale,
               ),
             ),

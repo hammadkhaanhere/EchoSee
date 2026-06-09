@@ -51,7 +51,7 @@ class _SignInScreenState extends State<SignInScreen>
     final bottom = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.navyBlue,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(24, 40, 24, 24 + bottom),
@@ -64,7 +64,7 @@ class _SignInScreenState extends State<SignInScreen>
                 Text(
                   'Welcome Back',
                   style: TextStyle(
-                    color: isDark ? AppColors.darkText : AppColors.textPrimary,
+                    color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -133,7 +133,7 @@ class _SignInScreenState extends State<SignInScreen>
         Text(
           'EchoSee',
           style: TextStyle(
-            color: isDark ? AppColors.darkText : AppColors.textPrimary,
+            color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
             fontSize: 22,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,

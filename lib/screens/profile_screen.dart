@@ -39,7 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isDark = widget.appState.themeMode == ThemeMode.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.navyBlue,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -47,38 +47,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              Center(
-                child: Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.teal.withValues(alpha: 0.2),
-                  ),
-                  child: Icon(Icons.person,
-                      size: 48,
-                      color: isDark ? AppColors.darkText : AppColors.textPrimary),
-                ),
+              _AnimatedSection(
+                delayMs: 0,
+                child: Center(child: _buildAvatar(isDark)),
               ),
               const SizedBox(height: 28),
-              _fieldLabel('Full Name', isDark),
-              const SizedBox(height: 6),
-              _buildField(_nameCtrl, isDark),
+              _AnimatedSection(
+                delayMs: 100,
+                child: _buildFieldGroup('Full Name', _nameCtrl, isDark),
+              ),
               const SizedBox(height: 20),
-              _fieldLabel('Email', isDark),
-              const SizedBox(height: 6),
-              _buildField(_emailCtrl, isDark),
+              _AnimatedSection(
+                delayMs: 200,
+                child: _buildFieldGroup('Email', _emailCtrl, isDark),
+              ),
               const SizedBox(height: 20),
-              _fieldLabel('Preferred Language', isDark),
-              const SizedBox(height: 6),
-              _buildLanguageDropdown(isDark),
+              _AnimatedSection(
+                delayMs: 300,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _fieldLabel('Preferred Language', isDark),
+                    const SizedBox(height: 6),
+                    _buildLanguageDropdown(isDark),
+                  ],
+                ),
+              ),
               const SizedBox(height: 32),
-              _buildSaveButton(isDark),
+              _AnimatedSection(
+                delayMs: 400,
+                child: _buildSaveButton(isDark),
+              ),
+              if (widget.appState.isPremium) ...[
+                const SizedBox(height: 16),
+                _AnimatedSection(
+                  delayMs: 500,
+                  child: _buildPremiumBadge(isDark),
+                ),
+              ],
               const SizedBox(height: 16),
-              if (widget.appState.isPremium) _buildPremiumBadge(isDark),
-              _buildSubscriptionCard(isDark),
+              _AnimatedSection(
+                delayMs: 500,
+                child: _buildSubscriptionCard(isDark),
+              ),
               const SizedBox(height: 24),
-              _buildSignOutButton(isDark),
+              _AnimatedSection(
+                delayMs: 600,
+                child: _buildSignOutButton(isDark),
+              ),
             ],
           ),
         ),
@@ -86,11 +102,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _buildAvatar(bool isDark) {
+    return Container(
+      width: 90,
+      height: 90,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.teal.withValues(alpha: 0.2),
+      ),
+      child: Icon(Icons.person,
+          size: 48,
+          color: isDark ? AppColors.darkText : AppColors.lightTextPrimary),
+    );
+  }
+
+  Widget _buildFieldGroup(String label, TextEditingController ctrl, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _fieldLabel(label, isDark),
+        const SizedBox(height: 6),
+        _buildField(ctrl, isDark),
+      ],
+    );
+  }
+
   Widget _fieldLabel(String text, bool isDark) {
     return Text(
       text,
       style: TextStyle(
-        color: isDark ? AppColors.darkText : AppColors.textPrimary,
+        color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
         fontSize: 14,
         fontWeight: FontWeight.w500,
       ),
@@ -100,15 +141,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildField(TextEditingController ctrl, bool isDark) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: isDark ? AppColors.darkFieldBg : AppColors.lightFieldBg,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: ctrl,
-        style: const TextStyle(color: Colors.white, fontSize: 15),
+        style: TextStyle(
+          color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
+          fontSize: 15,
+        ),
         decoration: InputDecoration(
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );
@@ -118,15 +163,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: isDark ? AppColors.darkFieldBg : AppColors.lightFieldBg,
         borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: _selectedLang,
           isExpanded: true,
-          dropdownColor: isDark ? AppColors.darkCard : AppColors.navyBlue,
-          style: const TextStyle(color: Colors.white, fontSize: 15),
+          dropdownColor: isDark ? AppColors.darkCard : Colors.white,
+          style: TextStyle(
+              color: isDark ? AppColors.darkText : AppColors.lightTextPrimary, fontSize: 15),
           items: ['English', 'Urdu']
               .map((l) => DropdownMenuItem(value: l, child: Text(l)))
               .toList(),
@@ -177,7 +223,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Icon(Icons.star, color: Colors.amber, size: 18),
           SizedBox(width: 6),
           Text('Premium Active',
-              style: TextStyle(color: Colors.amber, fontWeight: FontWeight.w600)),
+              style:
+                  TextStyle(color: Colors.amber, fontWeight: FontWeight.w600)),
         ],
       ),
     );
@@ -224,7 +271,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     widget.appState.isPremium
                         ? 'Multi-language, full history & more'
                         : 'Unlock all features',
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    style:
+                        const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ],
               ),
@@ -257,6 +305,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         child: const Text('Sign Out',
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+}
+
+// ─── Animated Section ─────────────────────────────────────
+
+class _AnimatedSection extends StatefulWidget {
+  final int delayMs;
+  final Widget child;
+  const _AnimatedSection({required this.delayMs, required this.child});
+
+  @override
+  State<_AnimatedSection> createState() => _AnimatedSectionState();
+}
+
+class _AnimatedSectionState extends State<_AnimatedSection>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _fade;
+  late Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+    _fade = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeIn),
+    );
+    _slide = Tween<Offset>(
+      begin: const Offset(0, 0.15),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeOut),
+    );
+    Future.delayed(Duration(milliseconds: widget.delayMs), () {
+      if (mounted) _ctrl.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(
+        position: _slide,
+        child: widget.child,
       ),
     );
   }

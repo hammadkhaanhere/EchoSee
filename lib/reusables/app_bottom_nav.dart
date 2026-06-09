@@ -13,9 +13,10 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Theme(
       data: Theme.of(context).copyWith(
-        canvasColor: AppColors.navyBlue,
+        canvasColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
         splashFactory: NoSplash.splashFactory,
         highlightColor: Colors.transparent,
       ),
@@ -27,7 +28,9 @@ class AppBottomNav extends StatelessWidget {
         selectedFontSize: 11,
         unselectedFontSize: 11,
         selectedItemColor: AppColors.teal,
-        unselectedItemColor: AppColors.textSecondary,
+        unselectedItemColor: isDark
+            ? AppColors.darkSubtitleText
+            : AppColors.lightTextSecondary,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Log'),
           BottomNavigationBarItem(icon: Icon(Icons.hearing), label: 'Listen'),

@@ -11,13 +11,15 @@ class SubscriptionScreen extends StatelessWidget {
     final isDark = appState.themeMode == ThemeMode.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.navyBlue,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
       appBar: AppBar(
         backgroundColor:
-            isDark ? AppColors.darkBackground : AppColors.navyBlue,
-        title: const Text('Subscription',
-            style: TextStyle(color: AppColors.textPrimary)),
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+            isDark ? AppColors.darkBackground : AppColors.lightBackground,
+        title: Text('Subscription',
+            style: TextStyle(
+                color: isDark ? AppColors.darkText : AppColors.lightTextPrimary)),
+        iconTheme: IconThemeData(
+            color: isDark ? AppColors.darkText : AppColors.lightTextPrimary),
         elevation: 0,
       ),
       body: Padding(
@@ -49,11 +51,11 @@ class SubscriptionScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            const Center(
+            Center(
               child: Text(
                 'Premium Features',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -64,7 +66,7 @@ class SubscriptionScreen extends StatelessWidget {
               child: Text(
                 'Unlock the full EchoSee experience',
                 style: TextStyle(
-                  color: isDark ? AppColors.darkSubtitleText : AppColors.textSecondary,
+                  color: isDark ? AppColors.darkSubtitleText : AppColors.lightTextSecondary,
                   fontSize: 14,
                 ),
               ),
@@ -74,21 +76,25 @@ class SubscriptionScreen extends StatelessWidget {
               Icons.translate,
               'Multi-language Translation',
               'Real-time translation across multiple languages',
+              isDark,
             ),
             _featureItem(
               Icons.history,
               'Full Transcript History',
               'Unlimited storage with search by date or keyword',
+              isDark,
             ),
             _featureItem(
               Icons.record_voice_over,
               'Speaker Identification',
               'Automatic detection and labeling of speakers',
+              isDark,
             ),
             _featureItem(
               Icons.tune,
               'Advanced Customization',
               'Subtitle color picker, drag & drop position, and more',
+              isDark,
             ),
             const Spacer(),
             SizedBox(
@@ -129,9 +135,9 @@ class SubscriptionScreen extends StatelessWidget {
               child: Text(
                 'Cancel anytime',
                 style: TextStyle(
-                  color: isDark
+                      color: isDark
                       ? AppColors.darkSubtitleText
-                      : AppColors.textSecondary,
+                      : AppColors.lightTextSecondary,
                   fontSize: 12,
                 ),
               ),
@@ -142,7 +148,7 @@ class SubscriptionScreen extends StatelessWidget {
     );
   }
 
-  Widget _featureItem(IconData icon, String title, String desc) {
+  Widget _featureItem(IconData icon, String title, String desc, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
@@ -163,8 +169,8 @@ class SubscriptionScreen extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
@@ -172,8 +178,10 @@ class SubscriptionScreen extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   desc,
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: isDark
+                        ? AppColors.darkSubtitleText
+                        : AppColors.lightTextSecondary,
                     fontSize: 12,
                   ),
                 ),

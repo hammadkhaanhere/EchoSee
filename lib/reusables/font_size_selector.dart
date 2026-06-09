@@ -50,7 +50,7 @@ class FontSizeSelector extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               style: TextStyle(
                 fontSize: 14 * appState.textScaleFactor,
-                color: AppColors.subtitleText,
+                color: AppColors.lightSubtitleText,
               ),
               child: Container(
                 padding: const EdgeInsets.all(12),

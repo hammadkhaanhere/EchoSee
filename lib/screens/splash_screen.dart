@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     final isDark = widget.appState.themeMode == ThemeMode.dark;
     return Scaffold(
-      backgroundColor: isDark ? AppColors.darkBackground : AppColors.navyBlue,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -57,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               'EchoSee',
               style: TextStyle(
-                color: isDark ? AppColors.darkText : AppColors.textPrimary,
+                color: isDark ? AppColors.darkText : AppColors.lightTextPrimary,
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
@@ -69,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen> {
               style: TextStyle(
                 color: isDark
                     ? AppColors.darkSubtitleText
-                    : AppColors.textSecondary,
+                    : AppColors.lightTextSecondary,
                 fontSize: 14,
                 letterSpacing: 0.5,
               ),
