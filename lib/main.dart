@@ -50,6 +50,8 @@ class _EchoSeeAppState extends State<EchoSeeApp> {
           theme: AppColors.lightTheme,
           darkTheme: AppColors.darkTheme,
           themeMode: _appState.themeMode,
+          themeAnimationDuration: const Duration(milliseconds: 200),
+          themeAnimationCurve: Curves.easeInOut,
           home: _ready
               ? SplashScreen(appState: _appState)
               : const SizedBox(),

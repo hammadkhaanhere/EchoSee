@@ -154,9 +154,12 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  SharedPreferences? _prefs;
+
   // Persistence
   Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
+    _prefs = await SharedPreferences.getInstance();
+    final prefs = _prefs!;
     _themeMode =
         _parseThemeMode(prefs.getString('themeMode') ?? 'system');
     _fontSize =
@@ -194,7 +197,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> _save() async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefs = _prefs ?? await SharedPreferences.getInstance();
     await prefs.setString('themeMode', _themeMode.name);
     await prefs.setString('fontSize', _fontSize.name);
     await prefs.setInt('subtitleBgColor', _subtitleBgColor.toARGB32());
