@@ -1,11 +1,13 @@
+import 'package:eecho_see/app/bindings/initial_binding.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'app/routes/app_pages.dart';
 import 'app/routes/app_routes.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await InitialBinding.initServices();
   runApp(const EchoSeeApp());
 }
 

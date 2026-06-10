@@ -1,4 +1,6 @@
+import 'package:eecho_see/app/routes/app_routes.dart';
 import 'package:eecho_see/data/models/language_model.dart';
+import 'package:eecho_see/data/services/settings_service.dart';
 import 'package:eecho_see/modules/home/controllers/home_controller.dart';
 import 'package:eecho_see/widgets/microphone%20button.dart';
 import 'package:eecho_see/widgets/status_indicator.dart';
@@ -6,11 +8,12 @@ import 'package:eecho_see/widgets/subtitle_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
   void _showLanguagePicker(BuildContext context) {
+    final settingsService = Get.find<SettingsService>();
+
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -23,7 +26,7 @@ class HomeView extends GetView<HomeController> {
             children: [
               const SizedBox(height: 16),
               Text(
-                'Subtitle Language',
+                'Translation Language',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
@@ -34,8 +37,9 @@ class HomeView extends GetView<HomeController> {
                   itemBuilder: (context, index) {
                     final lang = LanguageModel.supportedLanguages[index];
                     return Obx(() {
-                      final isSelected =
-                          controller.selectedLanguage.value.code == lang.code;
+                      final isSelected = settingsService
+                              .settings.value.translationLanguageCode ==
+                          lang.code;
                       return ListTile(
                         leading: Text(
                           lang.code.toUpperCase(),
@@ -49,12 +53,14 @@ class HomeView extends GetView<HomeController> {
                         title: Text(lang.nativeName),
                         subtitle: Text(lang.name),
                         trailing: isSelected
-                            ? Icon(Icons.check_circle,
-                                color: Theme.of(context).primaryColor)
+                            ? Icon(
+                                Icons.check_circle,
+                                color: Theme.of(context).primaryColor,
+                              )
                             : null,
                         selected: isSelected,
                         onTap: () {
-                          controller.setLanguage(lang);
+                          controller.setTranslationLanguage(lang.code);
                           Get.back();
                         },
                       );
@@ -77,9 +83,19 @@ class HomeView extends GetView<HomeController> {
         centerTitle: true,
         actions: [
           IconButton(
+            icon: const Icon(Icons.delete_sweep),
+            onPressed: controller.clearHistory,
+            tooltip: 'Clear History',
+          ),
+          IconButton(
             icon: const Icon(Icons.translate),
             onPressed: () => _showLanguagePicker(context),
-            tooltip: 'Select Language',
+            tooltip: 'Translation Language',
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Get.toNamed(AppRoutes.settings),
+            tooltip: 'Settings',
           ),
         ],
       ),
@@ -98,21 +114,21 @@ class HomeView extends GetView<HomeController> {
                   child: Column(
                     children: [
                       Obx(
-                            () => StatusIndicator(
+                        () => StatusIndicator(
                           status: controller.statusMessage.value,
                           isListening: controller.isListening.value,
                           isInitializing: controller.isInitializing.value,
                         ),
                       ),
-                       SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Expanded(
                         child: SubtitlePanel(
                           colorScheme: Theme.of(context).colorScheme,
                         ),
                       ),
-                       SizedBox(height: 24),
+                      const SizedBox(height: 24),
                       Obx(
-                            () => MicrophoneButton(
+                        () => MicrophoneButton(
                           isListening: controller.isListening.value,
                           isInitializing: controller.isInitializing.value,
                           onPressed: controller.toggleListening,

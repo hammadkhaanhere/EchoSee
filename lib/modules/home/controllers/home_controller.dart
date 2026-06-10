@@ -1,17 +1,28 @@
 import 'dart:async';
 
-import 'package:eecho_see/data/models/language_model.dart';
-import 'package:eecho_see/data/services/speech_service.dart';
-import 'package:eecho_see/services/translation_service.dart';
+import 'package:eecho_see/data/models/transcript_item.dart';
+import 'package:eecho_see/data/services/asr/asr_coordinator.dart';
+import 'package:eecho_see/data/services/asr/asr_result.dart';
+import 'package:eecho_see/data/services/settings_service.dart';
+import 'package:eecho_see/data/services/speaker_identification_service.dart';
+import 'package:eecho_see/data/services/translation_service.dart';
 import 'package:get/get.dart';
-import 'package:speech_to_text/speech_recognition_result.dart';
-
 
 class HomeController extends GetxController {
-  HomeController(this._speechService);
+  HomeController({
+    required AsrCoordinator asrCoordinator,
+    required TranslationService translationService,
+    required SettingsService settingsService,
+    required SpeakerIdentificationService speakerService,
+  })  : _asrCoordinator = asrCoordinator,
+        _translationService = translationService,
+        _settingsService = settingsService,
+        _speakerService = speakerService;
 
-  final SpeechService _speechService;
-  final TranslationService _translationService = TranslationService();
+  final AsrCoordinator _asrCoordinator;
+  final TranslationService _translationService;
+  final SettingsService _settingsService;
+  final SpeakerIdentificationService _speakerService;
 
   final recognizedText = 'Press the microphone and start speaking.'.obs;
   final translatedText = ''.obs;
@@ -19,26 +30,17 @@ class HomeController extends GetxController {
   final isInitializing = false.obs;
   final statusMessage = 'Ready'.obs;
   final errorMessage = RxnString();
+  final transcriptHistory = <TranscriptItem>[].obs;
 
-  final selectedLanguage = LanguageModel.supportedLanguages[0].obs;
-  final Map<String, String> _translationCache = {};
   Timer? _debounceTimer;
 
-  void setLanguage(LanguageModel language) {
-    if (selectedLanguage.value.code == language.code) return;
-    selectedLanguage.value = language;
-    if (recognizedText.value.isNotEmpty &&
-        recognizedText.value != 'Press the microphone and start speaking.') {
-      _translateText(recognizedText.value);
-    }
-  }
+  String get currentSpeakerLabel => _speakerService.currentSpeakerLabel.value;
 
   Future<void> toggleListening() async {
     if (isListening.value) {
       await stopListening();
       return;
     }
-
     await startListening();
   }
 
@@ -52,20 +54,19 @@ class HomeController extends GetxController {
     statusMessage.value = 'Preparing microphone...';
 
     try {
-      final result = await _speechService.initialize(
+      final ok = await _asrCoordinator.initialize(
         onStatus: _handleSpeechStatus,
         onError: _handleSpeechError,
       );
 
-      if (!result.isAvailable) {
-        errorMessage.value = result.message;
+      if (!ok) {
         statusMessage.value = 'Unavailable';
         return;
       }
 
-      await _speechService.startListening(onResult: _handleSpeechResult);
+      await _asrCoordinator.startListening(onResult: _handleSpeechResult);
       isListening.value = true;
-      statusMessage.value = 'Listening';
+      statusMessage.value = 'Listening · ${_asrCoordinator.activeModeLabel.value}';
     } catch (error) {
       errorMessage.value = 'Unable to start speech recognition. $error';
       statusMessage.value = 'Error';
@@ -75,45 +76,89 @@ class HomeController extends GetxController {
   }
 
   Future<void> stopListening() async {
-    await _speechService.stopListening();
+    await _asrCoordinator.stopListening();
     isListening.value = false;
     statusMessage.value = 'Stopped';
   }
 
-  void _handleSpeechResult(SpeechRecognitionResult result) {
-    final words = result.recognizedWords.trim();
-    if (words.isNotEmpty && words != recognizedText.value) {
-      recognizedText.value = words;
-      _translateText(words);
-    }
-  }
-
-  Future<void> _translateText(String text) async {
-    final langCode = selectedLanguage.value.code;
-    final cacheKey = '$langCode:$text';
-
-    if (_translationCache.containsKey(cacheKey)) {
-      translatedText.value = _translationCache[cacheKey]!;
+  void _handleSpeechResult(AsrResult result) {
+    final words = result.text.trim();
+    if (words.isEmpty) {
       return;
     }
 
+    final speaker = currentSpeakerLabel;
+    recognizedText.value = '[$speaker]\n$words';
+    _translateText(words);
+
+    if (result.isFinal) {
+      _addToHistory(words, translatedText.value, speaker);
+      recognizedText.value = 'Press the microphone and start speaking.';
+      translatedText.value = '';
+    }
+  }
+
+  void _addToHistory(String text, String translation, String speaker) {
+    if (transcriptHistory.isNotEmpty &&
+        transcriptHistory.last.text == text &&
+        transcriptHistory.last.speakerLabel == speaker) {
+      return;
+    }
+
+    transcriptHistory.add(
+      TranscriptItem(
+        text: text,
+        translation: translation,
+        speakerLabel: speaker,
+        timestamp: DateTime.now(),
+      ),
+    );
+  }
+
+  Future<void> _translateText(String text) async {
+    final langCode = _settingsService.settings.value.translationLanguageCode;
+
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () async {
-      try {
-        final translation = await _translationService.translate(text, to: langCode);
-        _translationCache[cacheKey] = translation;
-        translatedText.value = translation;
-      } catch (e) {
-        // Fallback to recognized text if translation fails
-        translatedText.value = text;
+    _debounceTimer = Timer(
+      const Duration(milliseconds: 300),
+      () async {
+        try {
+          final translation = await _translationService.translate(
+            text,
+            to: langCode,
+          );
+          translatedText.value = translation;
+        } catch (_) {
+          translatedText.value = text;
+        }
+      },
+    );
+  }
+
+  void setTranslationLanguage(String code) {
+    _settingsService.updatePartial(
+      (current) => current.copyWith(translationLanguageCode: code),
+    );
+    if (recognizedText.value.isNotEmpty &&
+        recognizedText.value != 'Press the microphone and start speaking.') {
+      final lines = recognizedText.value.split('\n');
+      if (lines.length > 1) {
+        _translateText(lines.sublist(1).join('\n'));
       }
-    });
+    }
+  }
+
+  void clearHistory() {
+    transcriptHistory.clear();
+    _speakerService.resetSession();
   }
 
   void _handleSpeechStatus(String status) {
-    if (status == 'listening') {
-      isListening.value = true;
-      statusMessage.value = 'Listening';
+    if (status == 'listening' || status == 'ready') {
+      isListening.value = status == 'listening';
+      if (status == 'listening') {
+        statusMessage.value = 'Listening · ${_asrCoordinator.activeModeLabel.value}';
+      }
       return;
     }
 
@@ -131,7 +176,8 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {
-    _speechService.cancelListening();
+    _debounceTimer?.cancel();
+    _asrCoordinator.stopListening();
     super.onClose();
   }
 }

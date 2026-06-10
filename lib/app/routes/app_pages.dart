@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
 
 import '../../modules/home/views/home_view.dart';
+import '../../modules/settings/views/settings_view.dart';
 import '../bindings/home_binding.dart';
+import '../bindings/settings_binding.dart';
 import 'app_routes.dart';
 
 abstract class AppPages {
@@ -12,6 +14,11 @@ abstract class AppPages {
       name: AppRoutes.home,
       page: () => const HomeView(),
       binding: HomeBinding(),
+    ),
+    GetPage<dynamic>(
+      name: AppRoutes.settings,
+      page: () => const SettingsView(),
+      binding: SettingsBinding(),
     ),
   ];
 }
