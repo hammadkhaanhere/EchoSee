@@ -84,7 +84,9 @@ class _AuthTextFieldState extends State<AuthTextField>
                     : AppColors.lightFieldBg,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.white24 : Colors.grey.shade300,
+                  ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),

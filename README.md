@@ -20,13 +20,16 @@ See the sound around you — a Flutter app that provides real-time speech-to-tex
 ## Auth Flow
 
 ```
-Splash (3s) → Sign In ─→ Sign Up ─→ Home
-                  ↑                    │
-                  └──── Sign Out ──────┘
+Splash (3s) → Sign In ←── Sign Up ─→ Sign In
+                  │                        ↑
+                  └── Sign In success ─── Home
+                              │
+                    Sign Out ──┘
 ```
 
 - Users are stored in SharedPreferences as a JSON list.
 - Current session is persisted across restarts.
+- Sign Up navigates to Sign In so the user logs in with new credentials.
 - Sign Out returns to the Sign In screen.
 
 ## Screens
@@ -47,7 +50,7 @@ Splash (3s) → Sign In ─→ Sign Up ─→ Home
 - Logo + full name, email, and password fields.
 - Fields slide up with staggered delays (100/200/300ms).
 - Inline validation errors per field.
-- Button: loading → success → auto-navigate to Home.
+- Button: loading → success → auto-navigate to Sign In.
 - "Already have an account?" link with fade transition back to Sign In.
 
 ### Home Screen
@@ -80,13 +83,14 @@ Splash (3s) → Sign In ─→ Sign Up ─→ Home
 
 ### Font Size Selector
 - Small (0.85×), Medium (1.0×), Large (1.15×).
+- Applied globally via `MediaQuery.textScaler` — affects every screen.
 - `AnimatedDefaultTextStyle` preview updates in real time.
 - Selected option highlighted with teal.
 
 ### Light / Dark Mode Toggle
 - Animated switch with custom toggle thumb icon.
-- Default follows system preference.
-- Whole-screen fade transition via `AnimatedSwitcher`.
+- On first launch, detects system brightness and sets the theme explicitly.
+- Smooth 200ms cross-fade between themes via `themeAnimationDuration`.
 
 ### Subtitle Customization
 - 6-color palette with `AnimatedContainer` border highlight + checkmark.
@@ -103,7 +107,7 @@ Splash (3s) → Sign In ─→ Sign Up ─→ Home
 | Button success checkmark         | `Icon` + state swap               | Auth Button                         |
 | Error shake                      | `TweenSequence` + `Transform`     | Auth Button                         |
 | Font size preview                | `AnimatedDefaultTextStyle`        | Font Size Selector                  |
-| Theme switch (whole screen)      | `AnimatedSwitcher` + fade         | MaterialApp home                    |
+| Theme switch (whole screen)      | `themeAnimationDuration` (200ms)  | MaterialApp                         |
 | Theme toggle knob                | `AnimatedContainer` + `Align`     | Theme Toggle                        |
 | Subtitle color picker            | `AnimatedContainer`               | Subtitle Customizer                 |
 | Text field slide-up              | `SlideTransition`                 | Auth Text Fields                    |
@@ -117,11 +121,11 @@ Splash (3s) → Sign In ─→ Sign Up ─→ Home
 
 | Token              | Light Hex   | Dark Hex    |
 |--------------------|-------------|-------------|
-| Background         | `#0D1B2A`   | `#0F0F23`   |
+| Background         | `#F0F4F8`   | `#0F0F23`   |
 | Teal (accent)      | `#00897B`   | `#00897B`   |
 | Green (Live dot)   | `#4CAF50`   | `#4CAF50`   |
-| Card / Surface     | `#F5F5F5`   | `#1A1A2E`   |
-| Subtitle bg        | `#FFFFFF`   | `#16213E`   |
+| Card / Surface     | `#FFFFFF`   | `#1A1A2E`   |
+| Subtitle bg        | `#E8EDF2`   | `#16213E`   |
 | Speaker label      | `#1565C0`   | `#1565C0`   |
 
 ## Architecture
@@ -148,7 +152,7 @@ lib/
 │   ├── profile_screen.dart
 │   ├── subscription_screen.dart
 │   └── transcript_screen.dart
-└── main.dart         entry point, MaterialApp with AnimatedSwitcher theme
+└── main.dart         entry point, MaterialApp with theme animation + global TextScaler
 ```
 
 ## Orientation

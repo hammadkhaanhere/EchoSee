@@ -4,7 +4,6 @@ import '../state/app_state.dart';
 import '../reusables/auth_text_field.dart';
 import '../reusables/auth_button.dart';
 import '../routes/custom_transitions.dart';
-import 'home_screen.dart';
 import 'sign_in_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -172,7 +171,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            fadeScaleRoute(HomeScreen(appState: widget.appState)),
+            fadeRoute(SignInScreen(appState: widget.appState)),
           );
         });
       }

@@ -49,7 +49,7 @@ class FontSizeSelector extends StatelessWidget {
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 300),
               style: TextStyle(
-                fontSize: 14 * appState.textScaleFactor,
+                fontSize: 14,
                 color: AppColors.lightSubtitleText,
               ),
               child: Container(

@@ -52,6 +52,15 @@ class _EchoSeeAppState extends State<EchoSeeApp> {
           themeMode: _appState.themeMode,
           themeAnimationDuration: const Duration(milliseconds: 200),
           themeAnimationCurve: Curves.easeInOut,
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler:
+                    TextScaler.linear(_appState.textScaleFactor),
+              ),
+              child: child!,
+            );
+          },
           home: _ready
               ? SplashScreen(appState: _appState)
               : const SizedBox(),

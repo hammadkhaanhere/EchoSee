@@ -182,7 +182,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   speaker: item['speaker']!,
                   text: item['text']!,
                   isDark: isDark,
-                  textScale: widget.appState.textScaleFactor,
                 );
               },
             ),
@@ -392,14 +391,12 @@ class _AnimatedSubtitle extends StatefulWidget {
   final String speaker;
   final String text;
   final bool isDark;
-  final double textScale;
 
   const _AnimatedSubtitle({
     super.key,
     required this.speaker,
     required this.text,
     required this.isDark,
-    required this.textScale,
   });
 
   @override
@@ -482,7 +479,7 @@ class _AnimatedSubtitleState extends State<_AnimatedSubtitle>
                 color: widget.isDark
                     ? AppColors.darkSubtitleText
                     : AppColors.lightSubtitleText,
-                fontSize: 14 * widget.textScale,
+                fontSize: 14,
               ),
             ),
           ),
